@@ -250,14 +250,12 @@ class NFA:
 
 if __name__ == "__main__":
     nfa = NFA()
-    dfa = None
 
     while True:
         # input_command = input(
         #     "1 - for checking string, enter 1: \n2 - for generating dfa, enter 2: \n3 - for drawing nfa, enter 3: \n4 - to create regex, enter 4: \n5 - to exit, enter 5: \n")
         print('#' * 80)
         print('NFA-isaccept: read string from input and check if it is accepted by NFA')
-        print('NFA-convert: convert NFA to its equivalent DFA')
         print('NFA-regex: find the regular expression corresponding to NFA')
         print('NFA-show: show the diagram corresponding to NFA')
         print('#' * 80)
@@ -265,15 +263,12 @@ if __name__ == "__main__":
         print('DFA-simple: create the simplified equivalent to existing DFA')
         print('DFA-show: show the diagram corresponding to DFA')
         print('#' * 80)
-        print('NFA-input: read arguments from input and create a NFA')
-        print('DFA-input: read arguments from input and create a DFA')
+        print('input: read arguments from input and create a NFA')
         print('exit: quit the program')
         print('#' * 80)
         input_command = input().lower()
-        if input_command == 'nfa-input':
+        if input_command == 'input':
             nfa.begin_program()
-        elif input_command == 'dfa-input':
-            pass
         elif input_command == 'exit':
             break
         elif input_command == 'nfa-isaccept':
@@ -282,13 +277,6 @@ if __name__ == "__main__":
                 print("string is accepted")
             else:
                 print("string is NOT accepted")
-        elif input_command == 'nfa-convert':
-            generated_dfa = nfa.convert_to_dfa()
-            generated_dfa.draw_dfa()
-            print("NFA successfuly converted to DFA!")
-            replace = input('Do you want to replace the existing DFA with this one? (y/n)').lower()
-            if replace == 'y':
-                dfa = generated_dfa
         elif input_command == 'nfa-show':
             nfa.draw_nfa()
             print("NFA diagram generated successfuly!")
@@ -296,19 +284,19 @@ if __name__ == "__main__":
             regex = nfa.find_regex()
             print("the generated regex is: " + regex)
         elif input_command == 'dfa-isaccept':
+            dfa = nfa.convert_to_dfa()
             string = input('Please enter your desired string:')
             if dfa.isAcceptByDFA(string):
                 print("string is accepted")
             else:
                 print("string is NOT accepted")
         elif input_command == 'dfa-simple':
+            dfa = nfa.convert_to_dfa()
             simplified_dfa = dfa.makeSimpleDFA()
             simplified_dfa.draw_dfa()
             print("DFA successfully simplified!")
-            replace = input('Do you want to replace the existing DFA with this one? (y/n)').lower()
-            if replace == 'y':
-                dfa = simplified_dfa
         elif input_command == 'dfa-show':
+            dfa = nfa.convert_to_dfa()
             dfa.draw_dfa()
         else:
             print('Invalid command! Please try again.')
