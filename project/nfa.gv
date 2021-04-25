@@ -1,5 +1,5 @@
 digraph nfa {
-	rankdir=q size="8,5"
+	rankdir=q size=15
 	node [shape=doublecircle]
 	q1
 	q3
