@@ -175,7 +175,7 @@ class NFA:
             else:
                 diagram.edge(rule[0], rule[1], label=rule[2])
 
-        diagram.render()
+        diagram.view(quiet_view=True)
 
         return
 
