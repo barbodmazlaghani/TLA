@@ -258,6 +258,7 @@ if __name__ == "__main__":
         print('NFA-isaccept: read string from input and check if it is accepted by NFA')
         print('NFA-regex: find the regular expression corresponding to NFA')
         print('NFA-show: show the diagram corresponding to NFA')
+        print('NFA-convert: convert NFA to DFA')
         print('#' * 80)
         print('DFA-isaccept: read string from input and check if it is accepted by DFA')
         print('DFA-simple: create the simplified equivalent to existing DFA')
@@ -283,6 +284,10 @@ if __name__ == "__main__":
         elif input_command == 'nfa-regex':
             regex = nfa.find_regex()
             print("the generated regex is: " + regex)
+        elif input_command == 'nfa-convert':
+            dfa = nfa.convert_to_dfa()
+            dfa.draw_dfa()
+            print("DFA generated successfuly!")
         elif input_command == 'dfa-isaccept':
             dfa = nfa.convert_to_dfa()
             string = input('Please enter your desired string:')
