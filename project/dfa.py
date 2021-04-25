@@ -3,6 +3,7 @@ import itertools
 class DFA:
     def __init__(self, states, alphabet, final_states, transition_list):
         self.alphabet = alphabet
+        self.transition_list=transition_list
         self.states = states
         self.initial_state = states[0]
         self.final_states = final_states
@@ -65,6 +66,21 @@ class DFA:
              for c in self.alphabet for q in new_transition_table]
         return DFA(list(new_transition_table.keys()), self.alphabet, \
                      new_final_states, new_transition_list)
+    def draw_dfa(self):
+        from graphviz import Digraph
+
+        diagram = Digraph('dfa', format='png')
+        diagram.attr(rankdir='q', size='15')
+        diagram.attr('node', shape='doublecircle')
+        for final_state in self.final_states:
+            diagram.node(final_state)
+        diagram.attr('node', shape='circle')
+        for rule in self.transition_list:
+                diagram.edge(rule[0], rule[1], label=rule[2])
+
+        diagram.render()
+
+        return
 
 dfa = DFA(['q0', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6']\
         , ['a', 'b']\

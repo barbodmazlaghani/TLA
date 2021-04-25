@@ -162,7 +162,7 @@ class NFA:
         from graphviz import Digraph
 
         diagram = Digraph('nfa', format='png')
-        diagram.attr(rankdir='q', size='8,5')
+        diagram.attr(rankdir='q', size='15')
 
         diagram.attr('node', shape='doublecircle')
         for final_state in self.final_state_list:
@@ -267,6 +267,7 @@ if __name__ == "__main__":
 
         elif int(input_command) == 2:
             generated_dfa = nfa.convert_to_dfa()
+            generated_dfa.draw_dfa()
             print("DFA generated successfuly!")
 
         elif int(input_command) == 3:
