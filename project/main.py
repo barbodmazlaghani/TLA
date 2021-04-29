@@ -6,6 +6,24 @@ from dfa import DFA
 
 special_regex_characters = ["*", "(", ")", "+", "Σ"]
 
+def extract_states_from_input(input_string):
+    input_string = input_string.replace("{", "")
+    input_string = input_string.replace("}", "")
+    input_string = input_string.replace(",", " ")
+
+    return input_string.split()
+
+def extract_rule(input_string):
+    input_string = input_string.replace(",", " ")
+    rule_set = input_string.split()
+
+    return rule_set
+
+def extract_input_string(input_string):
+    input_string_list = []
+    for i in input_string:
+        input_string_list.append(i)
+    return input_string_list
 
 class ProcessLayer:
     state = ""
@@ -26,65 +44,28 @@ class NFA:
     rule_set = []
     dfa = None
 
-    def extract_states_from_input(self, input_string):
-        input_string = input_string.replace("{", "")
-        input_string = input_string.replace("}", "")
-        input_string = input_string.replace(",", " ")
-
-        return input_string.split()
-
-    def extract_rule(self, input_string):
-        input_string = input_string.replace(",", " ")
-        rule_set = input_string.split()
-        if rule_set[0] not in self.state_list:
-            raise Exception("Rule wrong. not in state list")
-
-        return rule_set
-
-    def extract_input_string(self, input_string):
-        input_string_list = []
-        for i in input_string:
-            input_string_list.append(i)
-        return input_string_list
-
     def check_final_state_list(self):
         for i in self.final_state_list:
             if i not in self.state_list:
                 raise Exception("Final state wrong. not in state list")
 
     def begin_program(self):
-        # state_input = input("1- input states: ")  # {q0,q1,q2,q3,q4,q5}
-        state_input = "{q0,q1,q2,q3,q4,q5,q6}"
-        # alphabet_input = input("1- input alphabet: ")  # {a,b}
-        alphabet_input = "{a,b}"
-        # final_state_input = input("1- input final states: ")  # {q1,q3}
-        final_state_input = "{q1,q3,q6}"
-        # rule_count = input("1- input rule count: ")  # 6,
-        rule_count = "9"
+        state_input = input("1- input states: ")  # {q0,q1,q2,q3,q4,q5}
+        alphabet_input = input("1- input alphabet: ")  # {a,b}
+        final_state_input = input("1- input final states: ")  # {q1,q3}
+        rule_count = input("1- input rule count: ")  # 6,
 
-        self.state_list = self.extract_states_from_input(state_input)
+        self.state_list = extract_states_from_input(state_input)
         self.inital_state = self.state_list[0]
-        self.alphabet_list = self.extract_states_from_input(alphabet_input)
+        self.alphabet_list = extract_states_from_input(alphabet_input)
 
-        self.final_state_list = self.extract_states_from_input(
-            final_state_input)
+        self.final_state_list = extract_states_from_input(final_state_input)
         self.check_final_state_list()
 
         rule_set = []
-        # for i in range(0, int(rule_count)):
-        #     rule = input("input {0}st rule: ".format(i+1))
-        #    rule_set.append(self.extract_rule(rule))
-        temp_rule_set = ["q0,q1,a",
-                         "q1,q1,b",
-                         "q1,q2,",
-                         "q2,q3,a",
-                         "q3,q2,a",
-                         "q3,q4,b",
-                         "q2,q5,b",
-                         "q5,q6,a",
-                         "q6,q1,b"]
-        for elem in temp_rule_set:
-            rule_set.append(self.extract_rule(elem))
+        for i in range(0, int(rule_count)):
+            rule = input("input {0}st rule: ".format(i+1))
+            rule_set.append(self.extract_rule(rule))
         self.rule_set = rule_set
 
     def check_input_string_list(self, input_string_list):
@@ -118,7 +99,6 @@ class NFA:
                 if len(rule) == 2 and rule[0] == elem:
                     next_direct_state_list.append(rule[1])
 
-        # print("state: " + str(initial_state) + " alphabet_word: " + str(alphabet_word) + " next_state: " + str(next_direct_state_list))
         return list(set(next_direct_state_list))
 
     def travers_nfa(self, input_string_list, input_string_length):
@@ -148,7 +128,7 @@ class NFA:
 
     def is_accepted_by_nfa(self):
         input_string = input('1- input string,e.g aabba: ')
-        input_string_list = self.extract_input_string(input_string)
+        input_string_list = extract_input_string(input_string)
 
         final_path_state_list = self.travers_nfa(
             input_string_list, len(input_string_list))
@@ -182,7 +162,110 @@ class NFA:
     def Union(self,lst1, lst2):
         final_list = list(set(lst1) | set(lst2))
         return final_list
-
+    
+    def get_all_states_from(self, state):
+        next_states = []
+        for rule in self.rule_set:
+            if rule[0] == state:
+                if len(rule) == 2:
+                    next_states.append([rule[1], ''])
+                else:
+                    next_states.append(rule[1:])
+        return next_states
+    
+    def get_all_states_to(self, state):
+        next_states = []
+        for rule in self.rule_set:
+            if rule[1] == state:
+                if len(rule) == 2:
+                    next_states.append([rule[0], ''])
+                else:
+                    next_states.append([rule[0], rule[2]])
+        return next_states
+    
+    def find_regex(self):
+        from copy import deepcopy
+        tmpNFA = deepcopy(self)
+        tmpNFA.rule_set.append(['start', self.inital_state])
+        tmpNFA.state_list.append('start')
+        tmpNFA.inital_state = 'start'
+        for final_state in self.final_state_list:
+            tmpNFA.rule_set.append([final_state, 'final'])
+        tmpNFA.state_list.append('final')
+        tmpNFA.final_state_list = ['final']
+        while True:
+            transitions_from_start = tmpNFA.get_all_states_from('start')
+            next_state, next_exp = '', ''
+            for state, exp in transitions_from_start:
+                if state != 'final':
+                    next_state = state
+                    next_exp = exp
+                    break
+            if next_state == '':
+                reg_exp = transitions_from_start[0][1]
+                for i in range(1, len(transitions_from_start)):
+                    reg_exp += ' + ' + transitions_from_start[i][1]
+                return reg_exp
+            states_from_next = tmpNFA.get_all_states_from(next_state)
+            states_to_next = tmpNFA.get_all_states_to(next_state)
+            if len(states_to_next) == 0:
+                return 'null'
+            from_dict = {}
+            to_dict = {}
+            for state_a, exp_a in states_to_next:
+                if exp_a == '':
+                    exp = 'λ'
+                else:
+                    exp = exp_a
+                if state_a in from_dict:
+                    from_dict[state_a] += ' + ' + exp
+                else:
+                    from_dict[state_a] = exp
+            for state_b, exp_b in states_from_next:
+                if exp_b == '':
+                    exp = 'λ'
+                else:
+                    exp = exp_b
+                if state_b in to_dict:
+                    to_dict[state_b] += ' + ' + exp
+                else:
+                    to_dict[state_b] = exp
+            for state in from_dict:
+                from_dict[state] = '(' + from_dict[state] + ')'
+            for state in to_dict:
+                to_dict[state] = '(' + to_dict[state] + ')'
+            loop = ''
+            if next_state in from_dict:
+                loop_base = from_dict[next_state]
+                if len(loop_base) == 3:
+                    loop = loop_base[1] + '*'
+                else:
+                    loop = loop_base + '*'
+            for state_a in from_dict:
+                if state_a == next_state:
+                    continue
+                exp_a = from_dict[state_a]
+                if exp_a == '(λ)':
+                    exp_from = ''
+                elif '+' in exp_a:
+                    exp_from = exp_a
+                else:
+                    exp_from = exp_a[1:-1]
+                for state_b in to_dict:
+                    if state_b == next_state:
+                        continue
+                    exp_b = to_dict[state_b]
+                    if exp_b == '(λ)':
+                        exp_to = ''
+                    elif '+' in exp_b:
+                        exp_to = exp_b
+                    else:
+                        exp_to = exp_b[1:-1]
+                    transition = [state_a, state_b, exp_from + loop + exp_to]
+                    tmpNFA.rule_set.append(transition)
+            tmpNFA.rule_set = [t for t in tmpNFA.rule_set if not (t[0] == next_state or t[1] == next_state)]
+            tmpNFA.state_list.remove(next_state)
+    
     def convert_to_dfa(self):
         import collections
         compare = lambda x, y: collections.Counter(x) == collections.Counter(y)
@@ -190,11 +273,10 @@ class NFA:
         for i in range(len(self.alphabet_list)):
             x=[]
             table.append(x)
-        running = True;
+        running = True
         table_states=[]
         table_states.append([self.inital_state])
-        trap_state=False;
-        #print(self.get_next_state(self.state_list[4],"a"))
+        trap_state=False
         while(running):
             generated_state=[]
             for i in range(len(table_states)):
@@ -247,13 +329,29 @@ class NFA:
         return DFAO
 
 
+def input_dfa(dfa):
+    state_input = input("1- input states: ")  # {q0,q1,q2,q3,q4,q5}
+    alphabet_input = input("1- input alphabet: ")  # {a,b}
+    final_state_input = input("1- input final states: ")  # {q1,q3}
+    rule_count = input("1- input rule count: ")  # 6,
+
+    state_list = extract_states_from_input(state_input)
+    inital_state = self.state_list[0]
+    alphabet_list = extract_states_from_input(alphabet_input)
+    final_state_list = extract_states_from_input(final_state_input)
+
+    rule_set = []
+    for i in range(0, int(rule_count)):
+        rule = input("input {0}st rule: ".format(i+1))
+        rule_set.append(extract_rule(rule))
+    
+    dfa = DFA(state_list, alphabet_list, final_state_list, rule_set)
 
 if __name__ == "__main__":
     nfa = NFA()
+    dfa = None
 
     while True:
-        # input_command = input(
-        #     "1 - for checking string, enter 1: \n2 - for generating dfa, enter 2: \n3 - for drawing nfa, enter 3: \n4 - to create regex, enter 4: \n5 - to exit, enter 5: \n")
         print('#' * 80)
         print('NFA-isaccept: read string from input and check if it is accepted by NFA')
         print('NFA-regex: find the regular expression corresponding to NFA')
@@ -264,12 +362,15 @@ if __name__ == "__main__":
         print('DFA-simple: create the simplified equivalent to existing DFA')
         print('DFA-show: show the diagram corresponding to DFA')
         print('#' * 80)
-        print('input: read arguments from input and create a NFA')
+        print('nfa-input: read arguments from input and create a NFA')
+        print('dfa-input: read arguments from input and create a DFA')
         print('exit: quit the program')
         print('#' * 80)
         input_command = input().lower()
-        if input_command == 'input':
+        if input_command == 'nfa-input':
             nfa.begin_program()
+        elif input_command == 'dfa-input':
+            input_dfa(dfa)
         elif input_command == 'exit':
             break
         elif input_command == 'nfa-isaccept':
@@ -286,22 +387,18 @@ if __name__ == "__main__":
             print("the generated regex is: " + regex)
         elif input_command == 'nfa-convert':
             dfa = nfa.convert_to_dfa()
-            dfa.draw_dfa()
             print("DFA generated successfuly!")
         elif input_command == 'dfa-isaccept':
-            dfa = nfa.convert_to_dfa()
             string = input('Please enter your desired string:')
             if dfa.isAcceptByDFA(string):
                 print("string is accepted")
             else:
                 print("string is NOT accepted")
         elif input_command == 'dfa-simple':
-            dfa = nfa.convert_to_dfa()
             simplified_dfa = dfa.makeSimpleDFA()
             simplified_dfa.draw_dfa()
             print("DFA successfully simplified!")
         elif input_command == 'dfa-show':
-            dfa = nfa.convert_to_dfa()
             dfa.draw_dfa()
         else:
             print('Invalid command! Please try again.')
